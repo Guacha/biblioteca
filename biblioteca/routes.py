@@ -1,6 +1,7 @@
+from flask import request, render_template, redirect, url_for
+from sqlalchemy import func
 from biblioteca import app
 from biblioteca.models import *
-from flask import request, render_template, redirect, url_for
 
 
 @app.route('/')
@@ -39,11 +40,11 @@ def results():
     params = ""
     books = db.session.query(Book)
     if not request.args.get("title", "") == "":
-        books = books.filter(Book.title.like(f"%{request.args['title']}%"))
+        books = books.filter(Book.title.ilike(f"%{request.args['title']}%"))
         params += f"- Nombre: {request.args['title']} "
     
     if not request.args.get("author", "") == "":
-        books = books.join(Author).filter(Author.name.like(f"%{request.args['author']}%"))
+        books = books.join(Author).filter(Author.name.ilike(f"%{request.args['author']}%"))
         params += f"- Autor: {request.args['author']} "
     
     if not request.args.get("isbn", "") == "":
@@ -58,4 +59,8 @@ def results():
 
 @app.route("/login")
 def login():
-    pass
+    return render_template("login.html")
+
+@app.route("/register")
+def register():
+    return render_template("register.html")

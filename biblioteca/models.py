@@ -1,12 +1,15 @@
 from datetime import date
 
-from flask import Markup
-from sqlalchemy import func
-from flask_admin.contrib.sqla import ModelView
+from sqlalchemy.sql.expression import column
 
 from biblioteca import db
 
-
+relacion_usuario_favoritos = db.Table(
+    'usuario_favoritos',
+    db.Model.metadata,
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('book_id', db.Integer, db.ForeignKey('book.id')),
+)
 class Book(db.Model):
     _id = db.Column("id", db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
@@ -22,6 +25,11 @@ class Book(db.Model):
     online_picture_route = db.Column(db.String(255))
     format = db.Column(db.String(50), nullable=False)
     loans = db.relationship("Loan", back_populates="loaned_book")
+    users_liked = db.relationship("User", secondary=relacion_usuario_favoritos, back_populates="liked_books")
+    
+    @property
+    def author_name(self):
+        return self.author.name
     
     def __repr__(self):
         return f"<Book: {self.title} by {self.author.name}>"
@@ -38,9 +46,11 @@ class Author(db.Model):
     @property
     def amount_books_written(self):
         return len(self.books_written)
+   
         
 class Loan(db.Model):
     _id = db.Column("id", db.Integer, primary_key=True)
+    loan_code = db.Column(db.String(8), nullable=False, unique=True)
     loaner_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     loaner = db.relationship("User", back_populates="loans")
     loaned_book_id = db.Column(db.Integer, db.ForeignKey("book.id"))
@@ -49,29 +59,37 @@ class Loan(db.Model):
     returned = db.Column(db.Boolean(), default=False)
     return_date = db.Column(db.Date)
     
+    
+    @property
+    def loaner_document(self):
+        return self.loaner.num_id
+    
 
 class User(db.Model):
     _id = db.Column("id", db.Integer, primary_key=True)
-    num_id = db.Column(db.Integer, nullable=False)
-    email = db.Column(db.String(255), nullable=False)
+    num_id = db.Column(db.Integer, nullable=False, unique=True)
+    email = db.Column(db.String(255), nullable=False, unique=True)
     phone = db.Column(db.Integer)
-    password = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(90), nullable=False)
     loans = db.relationship("Loan", back_populates="loaner")
+    liked_books = db.relationship("Book", secondary=relacion_usuario_favoritos, back_populates="users_liked")
     
     @property
     def current_loans(self):
-        curr_loans = [loan for loan in self.loans if loan.returned]
-    
-    
-class BookView(ModelView):
-    column_exclude_list = ["online_picture_route", "local_picture_route"]
-    column_searchable_list = ['title', 'isbn']
-    column_filters = ['author']
-    page_size = 30
+        return [loan for loan in self.loans if not loan.returned]
+        
 
-
-class AuthorView(ModelView):
+class Employee(db.Model):
+    _id = db.Column("id", db.Integer, primary_key=True)
+    numdoc = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(255), nullable=False)
+    lname = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(90), nullable=False)
     
-    column_list = ("name", "amount_books_written")
+    
+    
+
+    
     
     
