@@ -1,5 +1,4 @@
-from re import A
-from . import *
+from db_functions import *
 
 def create_author(author_name, self_commit=True):
     a = Author(name=author_name)
@@ -8,7 +7,7 @@ def create_author(author_name, self_commit=True):
         db.session.commit()
     return a
 
-def create_book(title, author, amount, isbn, category, price, rating, format, online_picture_route, local_picture_route=None):
+def create_book(title, author, amount, isbn, category, price, rating, format, online_picture_route, local_picture_route=None, self_commit=False):
     if isinstance(author, str):
         author = create_author(author, self_commit=False)
         

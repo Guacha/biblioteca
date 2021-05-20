@@ -1,8 +1,9 @@
-import datetime
 import csv
 import math, random
-from db_manipulation.database_functions import *
+from db_functions import db
+from db_functions.functions import *
 
+db.create_all()
 
 with open("main_dataset.csv") as csvfile:
     csvreader = csv.reader(csvfile, delimiter=",")
@@ -10,12 +11,12 @@ with open("main_dataset.csv") as csvfile:
     added_count = 0
     for row in csvreader:
         if total_count == 0:
-            pass # Do nothing
+            pass # Faire rien
         else:
             online_picture_route = row[0]
             book_name = "N/A" if row[1] == "" else row[1]
             author_name = "N/A" if row[2] == "" else row[2]
-            book_format = row[3]
+            book_format = "Poster/Stationary" if row[3] == "" else row[3]
             book_rating = float(row[4])
             try:
                 book_price = math.ceil((float(row[5])*3000)/1000)*1000
@@ -25,7 +26,7 @@ with open("main_dataset.csv") as csvfile:
             book_category = row[9]
             book_img_path = row[10]
             
-            book = db.session.query(Book).filter(Book.isbn == book_isbn).first()
+            book = db.session.query(Book).filter((Book.isbn == book_isbn) | ((Book.format == book_format) & (Book.title == book_name))).first()
             
             if book is None:
                 author = db.session.query(Author).filter(Author.name == author_name).first()
@@ -66,4 +67,5 @@ with open("main_dataset.csv") as csvfile:
         
         
 print(f"Processed books: {total_count}")
-print(f"Skipped over books (Repeats): {total_count-added_count} ({(total_count-added_count)/total_count*100})")
+print(f"Skipped over books (Repeats): {total_count-added_count} ({(total_count-added_count)/total_count*100}%)")
+db.session.commit()
