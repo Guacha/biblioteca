@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8">
     <title>BiblioTech - Login</title>
-    <link rel="stylesheet" href="css/master.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/master.css') }}">
   </head>
   <body>
 
     <div class="login-box">
-      <img src="img/user.png" class="avatar" alt="Avatar Image">
+      <img src="{{ url_for('static', filename='img/user.png') }}" class="avatar" alt="Avatar Image">
       <h1>Ingresa aquí</h1>
       <form>
         <!-- USERNAME INPUT -->

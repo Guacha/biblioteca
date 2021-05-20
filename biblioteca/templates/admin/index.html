@@ -1,0 +1,33 @@
+{% extends 'admin/master.html' %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col">
+            <div class="card text-white bg-dark mb-3">
+                <h4 class="card-header">Libros en base de datos</h4>
+                <div class="card-body">
+                    <h1 class="card-title">{{ b_amt }} Libros</h1>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card text-white bg-dark mb-3">
+                <h4 class="card-header">Préstamos pendientes</h4>
+                <div class="card-body">
+                    <h1 class="card-title">{{ current_loans }} Préstamos</h1>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card text-white bg-dark mb-3">
+                <h4 class="card-header">Libros agotados</h4>
+                <div class="card-body">
+                    <h1 class="card-title">{{ unavailable_books }} agotados</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
