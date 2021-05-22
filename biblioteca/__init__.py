@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
+from flask_login import LoginManager
 
 app = Flask(__name__)
 
@@ -13,10 +14,14 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://bibliotech_app:bibliotech2
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
-from biblioteca import models
+
+#Manejo de login y sesiones
+login_manager = LoginManager(app)
+
 
 # Configuración del módulo ADMIN
 from biblioteca import views
+from biblioteca import models
 admin = Admin(app, name="BiblioTech", template_mode='bootstrap4', index_view=views.HomeView())
 admin.add_view(views.BookView(models.Book, db.session))
 admin.add_view(views.LoanView(models.Loan, db.session))

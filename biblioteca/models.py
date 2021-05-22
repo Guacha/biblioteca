@@ -1,8 +1,14 @@
 from datetime import date
 
 from sqlalchemy.sql.expression import column
+from flask_login import UserMixin
 
-from biblioteca import db
+from biblioteca import db, login_manager
+
+
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 relacion_usuario_favoritos = db.Table(
     'usuario_favoritos',
@@ -65,9 +71,11 @@ class Loan(db.Model):
         return self.loaner.num_id
     
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     _id = db.Column("id", db.Integer, primary_key=True)
     num_id = db.Column(db.Integer, nullable=False, unique=True)
+    fname = db.Column(db.String(50), nullable=False)
+    lname = db.Column(db.String(70), nullable=False)
     email = db.Column(db.String(255), nullable=False, unique=True)
     phone = db.Column(db.Integer)
     password = db.Column(db.String(90), nullable=False)
@@ -77,12 +85,20 @@ class User(db.Model):
     @property
     def current_loans(self):
         return [loan for loan in self.loans if not loan.returned]
+    
+    @classmethod
+    def registerUser(num_id: int, fname: str, lname, email: str, password: str, phone: int = None):
+        u = User(num_id=num_id, fname=fname, lname=lname, email=email, password=password, phone=phone)
+        db.session.add(u)
+        db.session.commit()
+        return u
+    
         
 
 class Employee(db.Model):
     _id = db.Column("id", db.Integer, primary_key=True)
     numdoc = db.Column(db.Integer, nullable=False)
-    name = db.Column(db.String(255), nullable=False)
+    fname = db.Column(db.String(255), nullable=False)
     lname = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), nullable=False)
     password = db.Column(db.String(90), nullable=False)
