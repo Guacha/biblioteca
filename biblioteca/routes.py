@@ -1,4 +1,6 @@
 from flask import request, render_template, redirect, url_for, flash
+from flask_login import login_user, current_user
+
 from biblioteca import app
 from biblioteca.models import *
 from biblioteca.forms import *
@@ -7,24 +9,7 @@ from biblioteca.crypt import hash, dehash
 
 @app.route('/')
 def home():
-    flash("Hola Mundo", "Notoficación!")
     return render_template('index.html')
-
-
-@app.route("/books")
-def books():
-    page = request.args.get('page', 1, type=int)
-    books = Book.query.paginate(page=page, per_page=5)
-    return render_template("books.html", books=books)
-
-
-@app.route("/author/<author_name>")
-def author_page(author_name):
-    author = Author.query.filter(Author.name == author_name).first()
-    if author:
-        page = request.args.get('page', 1, type=int)
-        books = Book.query.filter(Book.author == author).paginate(page=page, per_page=5)
-        return render_template("author.html", author=author, books=books)
     
     
 @app.route("/search", methods=["POST"])
@@ -63,30 +48,47 @@ def results():
     return render_template("results.html", books=books, search_params=params)
 
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    return render_template("login.html")
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+    form = LoginForm()
+    if form.validate_on_submit():
+        u = db.session.query(User).filter_by(num_id=form.num_doc.data).first()
+        if u:
+            login_user(u)
+            flash(f"Bienvenido, {u.fname}", "Inicio de sesión correcto")
+            return redirect(url_for("home"))
+        else:
+            flash("Revisa los datos ingresados, e intenta nuevamente", "Error de inicio de sesión")
+    
+    return render_template("login.html", form=form)
 
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
     form = RegisterForm()
     if form.validate_on_submit():
         
         pw_hash = hash(form.pw.data)
         
         u = User.registerUser(
+            form.num_doc.data,
             form.fname.data,
             form.lname.data,
             form.email.data,
             pw_hash,
             form.phone.data
         )
-        
+        login_user(u)
+        flash(f"Cuenta para {form.fname.data} creada satisfactoriamente", "Éxito")
         
         return redirect(url_for('home'))
     
-    
+    print(form.fname.errors)
+    flash("Información inválida, intenta nuevamente", "Error")
     return render_template("register.html", form=form)
 
 @app.route('/user')

@@ -72,12 +72,12 @@ class Loan(db.Model):
     
 
 class User(db.Model, UserMixin):
-    _id = db.Column("id", db.Integer, primary_key=True)
-    num_id = db.Column(db.Integer, nullable=False, unique=True)
+    id = db.Column("id", db.Integer, primary_key=True)
+    num_id = db.Column(db.BigInteger, nullable=False, unique=True)
     fname = db.Column(db.String(50), nullable=False)
     lname = db.Column(db.String(70), nullable=False)
     email = db.Column(db.String(255), nullable=False, unique=True)
-    phone = db.Column(db.Integer)
+    phone = db.Column(db.BigInteger)
     password = db.Column(db.String(90), nullable=False)
     loans = db.relationship("Loan", back_populates="loaner")
     liked_books = db.relationship("Book", secondary=relacion_usuario_favoritos, back_populates="users_liked")
@@ -86,8 +86,8 @@ class User(db.Model, UserMixin):
     def current_loans(self):
         return [loan for loan in self.loans if not loan.returned]
     
-    @classmethod
-    def registerUser(num_id: int, fname: str, lname, email: str, password: str, phone: int = None):
+    @staticmethod
+    def registerUser(num_id: int, fname: str, lname: str, email: str, password: str, phone: int = None):
         u = User(num_id=num_id, fname=fname, lname=lname, email=email, password=password, phone=phone)
         db.session.add(u)
         db.session.commit()

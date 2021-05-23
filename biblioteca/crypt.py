@@ -5,7 +5,7 @@ crypto = Bcrypt(app)
 
 def hash(pw: str):
     global crypto
-    new_pw = crypto.generate_password_hash(str)
+    new_pw = crypto.generate_password_hash(pw).decode('utf8')
     return new_pw
 
 def dehash(pw: str) -> bool:

@@ -29,7 +29,11 @@
                     class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav ml-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('user') }}">Bienvenido, {{ current_user.fname }}. Ir a mi portal</a></li>
+                    {% else %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Regístrate/Ingresa</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

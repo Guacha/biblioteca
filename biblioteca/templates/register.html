@@ -8,6 +8,7 @@
 
 {% block form %}
   <form class="form-control bg-dark border-0" method="post" action="">
+    {{ form.csrf_token() }}
     <div class="row">
       <!-- USERNAME INPUT -->
       <div class="col-6 form-floating mb-3">
@@ -44,7 +45,7 @@
       {{ form.confirm_pw(class="form-control", id="confirm_pw") }}
       {{ form.confirm_pw.label(for="confirm_pw") }}
     </div>
-    <input class="btn btn-primary" type="submit" value="Ingresar">
+    {{ form.submit(class="btn btn-primary") }}
   </form>
 {% endblock form %}
 
