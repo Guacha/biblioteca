@@ -1,9 +1,10 @@
-from datetime import date
+from datetime import date, timedelta
 
 from sqlalchemy.sql.expression import column
 from flask_login import UserMixin
 
 from biblioteca import db, login_manager
+from biblioteca.crypt import new_uuid
 
 
 @login_manager.user_loader
@@ -40,6 +41,13 @@ class Book(db.Model):
     def __repr__(self):
         return f"<Book: {self.title} by {self.author.name}>"
     
+    def is_liked_by_user(self, user):
+        if user:
+            return user in self.users_liked
+        else:
+            return False
+        
+    
 
 class Author(db.Model):
     _id = db.Column("id", db.Integer, primary_key=True)
@@ -63,12 +71,37 @@ class Loan(db.Model):
     loaned_book = db.relationship("Book", back_populates="loans")
     takeout_date = db.Column(db.Date, nullable=False)
     returned = db.Column(db.Boolean(), default=False)
-    return_date = db.Column(db.Date)
+    est_return_date = db.Column(db.Date, nullable=False)
+    act_return_date = db.Column(db.Date)
     
     
     @property
     def loaner_document(self):
         return self.loaner.num_id
+    
+    @property
+    def delayed(self):
+        if self.act_return_date: 
+            return self.est_return_date <= self.act_return_date
+        else: 
+            return date.today() > self.est_return_date
+        
+    @staticmethod
+    def create_loan(user, book):
+        curr_date = date.today()
+        return_date = curr_date + timedelta(days=8)
+        unique = False
+        while not unique:
+            code = new_uuid()
+            if not Loan.query.filter(Loan.loan_code == code).first():
+                unique = True
+        l = Loan(loan_code=code,
+                 loaner=user,
+                 loaned_book=book,
+                 est_return_date=return_date,
+                 takeout_date=curr_date)
+        return l
+            
     
 
 class User(db.Model, UserMixin):

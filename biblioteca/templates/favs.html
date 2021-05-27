@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+    {% block content %}
+    <header class="masthead4 text-center text-white">
+        <div class="masthead4-content">
+            <div class="container">
+                <h1 class="masthead4-heading mb-0">BiblioTech - Favoritos</h1>
+                <img src="https://intranet.iepvivaesperanza.com/img/logo_user.png" alt="User Img" height="200" width="200">
+                <p>Todos los libros favoritos de {{current_user.fname}}</p>
+            </div>
+        </div>
+    </header>   
+    <!--Aquí van los libros favoritos del usuario-->
+    
+    <section>
+        {% if books %}
+            <div class="container mt-5">
+                <div class="row align-items-center row-cols-1 row-cols-md-3 g-4 mb-3">
+                    {% for book in books %}
+                        <div class="col mb-4">
+                            <div class="card text-white bg-dark h-100" style="width: 18rem;">
+                                <img class="card-img-top" src="{{ book.online_picture_route }}" width="150" height="350">
+                                <div class="card-body">
+                                <h5 class="card-title">{{ book.title|truncate(43, True) }}</h5>
+                                <p class="card-text">Por: {{ book.author.name }}</p>
+                                <p class="card-text">ISBN: {{ book.isbn }}</p>
+                                <button class="btn btn-primary" onclick="favorite({{ book._id }});">
+                                    {% if book.is_liked_by_user(current_user) %}
+                                        <i class="fas fa-heart" id="{{ book._id }}-icon"></i>
+                                    {% else %}
+                                        <i class="far fa-heart" id="{{ book._id }}-icon"></i>
+                                    {% endif %}
+                                </button>
+                                <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#rent-{{book._id}}">
+                                    Reservar
+                                </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div class="container mt-5">
+                <div class="row align-items-center">
+                    <h1 class="text-center">No tienes libros, busca alguno y agregalo!</h1>
+                    <form action="/search" method="POST" class="row g-3">
+                        <div class="col-12 mb-3">
+                            <label for="name_input" class="form-label">Título</label>
+                            <input type="text" class="form-control" id="name_input" placeholder="Título del libro" name="title">
+                        </div>
+                        <div class="col-6">
+                            <label for="auth_input" class="form-label">Autor</label>
+                            <input type="text" class="form-control" id="auth_input" placeholder="Autor del libro" name="author">
+                        </div>   
+                        <div class="col-6">
+                            <label for="isbn_input" class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="isbn_input" placeholder="ISBN del libro" name="isbn">
+                        </div>
+                        <div class="col-12 mt-4 text-center">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="show_available">
+                                <label class="form-check-label" for="show_available">
+                                    Mostrar libros sin ejemplares disponibles
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-12 text-center mt-4">
+                            <button class="btn btn-primary" type="submit">Buscar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+    </section>
+    
+{% endblock content %}
+
+{% block modals %}
+    {% if books %}
+        {% for book in books %}
+        
+        <div class="modal fade" id="rent-{{book._id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Confirmación de reserva</h5>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center" id="body-{{ book._id }}">
+                        {% if current_user.is_authenticated %}
+                            <h3> Seguro que deseas reservar el libro <b>{{ book.title }}</b>?</h3>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="soldMySoul-{{book._id}}">
+                                <label class="form-check-label" for="flexCheckDefault">
+                                Acepto los términos y condiciones de la reserva
+                                </label>
+                            </div>
+                            <button class="btn btn-primary btn-lg mt-3" onclick="rent({{ book._id}})">Reservar</button>
+                        {% else %}
+                            <h3> Regístrate o inicia sesión ya para reservar <b>{{ book.title }}</b></h3>
+                            <a href="{{ url_for('register') }}" class="btn btn-primary">Registrarme</a>
+                            <a href="{{ url_for('login') }}" class="btn btn-secondary">Inicia sesión</a>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                        <p class="text-muted">Al reservar, el usuario acepta que es su responsabilidad recoger y devolver el libro en la fecha estipulada en el prestamo, que siempre será 8 días calendario despúes del día en el que se hizo la reserva</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    {% endif %}
+
+{% endblock modals %}
+
+
+{% block scripts %}
+<script>
+    function togglePopup() {
+        document.getElementById("popup-1")
+            .classList.toggle("active");
+    }
+</script>
+
+<script>
+    function rent(bookID) {
+        if(document.getElementById('soldMySoul-' + bookID).checked) {
+            $.ajax({
+                url: "{{ url_for('rent') }}",
+                type: "POST",
+                data: {"book_id": bookID},
+                success: function(response) {
+                    var body = $("#body-" + bookID)
+                    body.empty();
+                    body.append("<h3> "+ response.message + "</h3>")
+                    if (response.success){
+                        body.append("<h4>Aquí tienes la información del prestamo, también puedes verla en tu perfil:</h4>")
+                        body.append("<h5>Código de prestamo: " + response.code + "</h5>")
+                        body.append("<h5>Fecha de retorno: " + response.return_date + "</h5>")
+                    } else {
+                        body.append("<h5>" + response.detail + "</h5>")
+                    }
+                }
+            })
+        } else {
+            alert("Por favor acepte los términos y condiciones de la reserva")
+        }
+    }
+</script>
+
+<script>
+    function favorite(bookID) {
+        $.ajax({
+            url: "{{ url_for('favourite') }}",
+            type: "POST",
+            data: {"book_id": bookID},
+            success: function(response) {
+                if (response.favorited){
+                    alert("Se agregó el libro a los favoritos");
+                    $("#" + bookID + "-icon").removeClass("far");
+                    $("#" + bookID + "-icon").addClass("fas");
+                } else {
+                    alert("Se eliminó el libro a los favoritos");
+                    $("#" + bookID + "-icon").removeClass("fas");
+                    $("#" + bookID + "-icon").addClass("far");
+                }
+            }
+        })
+    }
+</script>
+{% endblock scripts %}

@@ -2,14 +2,13 @@ from flask_admin.base import AdminIndexView
 from flask_admin import expose, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 
-from biblioteca import db
 from biblioteca.models import *
 
 class HomeView(AdminIndexView):
     @expose('/')
     def index(self):
         book_amount = len(Book.query.all())
-        current_loans = len(Loan.query.filter(not Loan.returned).all())
+        current_loans = len(Loan.query.filter(Loan.returned == False).all())
         unavailable_books = len(Book.query.filter(Book.amount_available == 0).all())
         return self.render('admin/index.html', b_amt=book_amount, current_loans=current_loans, unavailable_books=unavailable_books)
 
@@ -31,12 +30,15 @@ class BookView(ModelView):
 
 class LoanView(ModelView):
     column_filters = ['returned', 'loaner']
-    column_list = ('loaner_document', 'loaned_book', 'takeout_date', 'returned')
+    column_searchable_list = ['loan_code']
+    column_list = ('loaner_document', 'loan_code', 'loaned_book', 'takeout_date', 'est_return_date', 'returned')
     can_create = False
     can_delete = False
     column_labels = {
         'loaner_document': 'Documento del prestante',
         'loaned_book': 'Libro prestado',
         'takeout_date': 'Fecha de prestamo',
-        'returned': 'Prestamo retornado'
+        'est_return_date': 'Fecha de retorno',
+        'returned': 'Prestamo retornado',
+        'loan_code': "Código de préstamo"
     }

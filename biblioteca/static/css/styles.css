@@ -46,6 +46,76 @@
 *::after {
   box-sizing: border-box;
 }
+
+header.masthead4 {
+  position: relative;
+  overflow: hidden;
+  padding-top: calc(7rem + 72px);
+  padding-bottom: 7rem;
+  background: linear-gradient(0deg, #ff6a00 0%, #ee0979 100%);
+  background-image: url('../assets/img/favs.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: scroll;
+  background-size: cover;
+}
+header.masthead4 .masthead4-content {
+  z-index: 1;
+  position: relative;
+}
+header.masthead4 .masthead4-content .masthead4-heading {
+  font-size: 4rem;
+}
+header.masthead4 .masthead4-content .masthead4-subheading {
+  font-size: 1rem;
+}
+
+header.masthead5 {
+  position: relative;
+  overflow: hidden;
+  padding-top: calc(7rem + 72px);
+  padding-bottom: 7rem;
+  background: linear-gradient(0deg, #ff6a00 0%, #ee0979 100%);
+  background-image: url('../assets/img/prestamo.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: scroll;
+  background-size: cover;
+}
+header.masthead5 .masthead5-content {
+  z-index: 1;
+  position: relative;
+}
+header.masthead5 .masthead5-content .masthead5-heading {
+  font-size: 4rem;
+}
+header.masthead5 .masthead5-content .masthead5-subheading {
+  font-size: 1rem;
+}
+
+header.masthead3 {
+  position: relative;
+  overflow: hidden;
+  padding-top: calc(7rem + 72px);
+  padding-bottom: 7rem;
+  background: linear-gradient(0deg, #ff6a00 0%, #ee0979 100%);
+  background-image: url('../assets/img/user.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: scroll;
+  background-size: cover;
+}
+header.masthead3 .masthead3-content {
+  z-index: 1;
+  position: relative;
+}
+header.masthead3 .masthead3-content .masthead3-heading {
+  font-size: 4rem;
+}
+header.masthead3 .masthead3-content .masthead3-subheading {
+  font-size: 1rem;
+}
+
 header.masthead2 {
   position: relative;
   overflow: hidden;

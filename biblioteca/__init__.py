@@ -17,6 +17,7 @@ db = SQLAlchemy(app)
 
 #Manejo de login y sesiones
 login_manager = LoginManager(app)
+login_manager.login_view = "login"
 
 
 # Configuración del módulo ADMIN

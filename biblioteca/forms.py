@@ -53,6 +53,3 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Iniciar Sesión')
     
     
-    
-    
-    
